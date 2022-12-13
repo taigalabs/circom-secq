@@ -7,6 +7,7 @@ const P_BLS12381: &str =
 const P_GOLDILOCKS: &str = 
     "18446744069414584321";
 //const P_STR: &str = "21888242871839275222246405745257275088548364400416034343698204186575808495617";
+const P_CURVE25519: &str = "57896044618658097711785492504343953926634992332820282019728792003956564819949";
 
 pub struct UsefulConstants {
     p: BigInt,
@@ -35,6 +36,7 @@ impl UsefulConstants {
     pub fn new(possible_prime: &String) -> UsefulConstants {
         let prime_to_use = if possible_prime.eq("bn128") {P_BN128} 
           else if possible_prime.eq("bls12381") { P_BLS12381} 
+          else if possible_prime.eq("curve25519") {P_CURVE25519}
           else {P_GOLDILOCKS};
 
         UsefulConstants { p: BigInt::parse_bytes(prime_to_use.as_bytes(), 10).expect("can not parse p") }

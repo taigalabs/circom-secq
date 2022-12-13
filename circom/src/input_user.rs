@@ -309,7 +309,9 @@ mod input_processing {
                    let prime_value = matches.value_of("prime").unwrap();
                    if prime_value == "bn128"
                       || prime_value == "bls12381"
-                      || prime_value == "goldilocks"{
+                      || prime_value == "goldilocks"
+                      || prime_value == "curve25519"
+                      {
                         Ok(String::from(matches.value_of("prime").unwrap()))
                     }
                     else{
