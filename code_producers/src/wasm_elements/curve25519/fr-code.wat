@@ -3272,7 +3272,7 @@
          (local $np32 i64)
          (local $c i64)
          (local $m i64)
-        i64.const 678152731
+        i64.const 307527195
         set_local $np32
         i64.const 0
         set_local $c
@@ -4392,7 +4392,7 @@
          (local $y7 i64)
          (local $m7 i64)
          (local $q7 i64)
-        i64.const 678152731
+        i64.const 307527195
         set_local $np32
         get_local $c0
         i64.const 4294967295
@@ -6435,7 +6435,7 @@
          (local $x7 i64)
          (local $m7 i64)
          (local $q7 i64)
-        i64.const 678152731
+        i64.const 307527195
         set_local $np32
         i64.const 0
         set_local $c0
@@ -10952,7 +10952,7 @@
         get_local $pA
         get_local $pA
         i64.load offset=32
-        i64.const 9223372036854775807
+        i64.const 2305843009213693951
         i64.and
         i64.store offset=32
         get_local $pA
