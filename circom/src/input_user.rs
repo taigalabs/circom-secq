@@ -311,6 +311,7 @@ mod input_processing {
                       || prime_value == "bls12381"
                       || prime_value == "goldilocks"
                       || prime_value == "curve25519"
+                      || prime_value == "secq256k1"
                       {
                         Ok(String::from(matches.value_of("prime").unwrap()))
                     }
