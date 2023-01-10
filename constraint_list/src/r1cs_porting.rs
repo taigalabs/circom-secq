@@ -1,9 +1,17 @@
 use super::{ConstraintList, C, EncodingIterator, SignalMap};
 use constraint_writers::r1cs_writer::{ConstraintSection, CustomGatesAppliedData, HeaderData, R1CSWriter, SignalSection};
 
+fn nearest_power_of_2(n: usize) -> usize {
+    let mut v = 256usize;
+    while v >> 1 >= n {
+        v = v >> 1;
+    }
+    v
+}
+
 pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Result<(), ()> {
     use constraint_writers::log_writer::Log;
-    let field_size = (list.field.bits() / 64 + 1) * 8;
+    let field_size = nearest_power_of_2(list.field.bits()) / 8;
     let mut log = Log::new();
     log.no_labels = ConstraintList::no_labels(list);
     log.no_wires = ConstraintList::no_wires(list);
@@ -115,4 +123,17 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
 
     Log::print(&log);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn nearest_power_of_2() {
+        let vals = [256, 255, 254, 65, 64, 63, 1];
+        let expected = [256, 256, 256, 128, 64, 64, 1];
+
+        for (val, exp) in vals.iter().zip(expected.iter()) {
+            assert_eq!(super::nearest_power_of_2(*val), *exp);
+        }
+    }
 }
