@@ -8,7 +8,8 @@ pub struct DebugWriter {
 
 impl DebugWriter {
     pub fn new(c: String) -> Result<DebugWriter, ()> {
-        let c_ext = format!("{}_ext", c);
+        let c_ext = c.strip_suffix(".json").unwrap();
+        let c_ext = format!("{}_ext.json", c_ext);
         Result::Ok(DebugWriter { json_constraints: c, json_constraints_ext: c_ext })
     }
 
