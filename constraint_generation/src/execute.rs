@@ -110,11 +110,15 @@ pub fn constraint_execution(
     use Expression::Call;
 
     runtime_information.public_inputs = program_archive.get_public_inputs_main_component().clone();
+
+    println!("{:?}", runtime_information.public_inputs);
     
     let folded_value_result = 
         if let Call { id, args, .. } = &program_archive.get_main_expression() {
             let mut arg_values = Vec::new();
             for arg_expression in args.iter() {
+            println!("id: {}", id);
+
                 let f_arg = execute_expression(arg_expression, program_archive, &mut runtime_information, flags);
                 arg_values.push(safe_unwrap_to_arithmetic_slice(f_arg.unwrap(), line!()));
                 // improve
@@ -546,11 +550,15 @@ fn execute_expression(
     let mut can_be_simplified = true;
     let res = match expr {
         Number(_, value) => {
+            println!("expr number: {}", value);
+
             let a_value = AExpr::Number { value: value.clone() };
             let ae_slice = AExpressionSlice::new(&a_value);
             FoldedValue { arithmetic_slice: Option::Some(ae_slice), ..FoldedValue::default() }
         }
         Variable { meta, name, access, .. } => {
+            println!("expr variable, name: {}", name);
+
             if ExecutionEnvironment::has_signal(&runtime.environment, name) {
                 execute_signal(meta, name, access, program_archive, runtime, flags)?
             } else if ExecutionEnvironment::has_component(&runtime.environment, name) {
@@ -562,6 +570,8 @@ fn execute_expression(
             }
         }
         ArrayInLine { meta, values, .. } => {
+            // println!("expr array in line");
+
             let mut arithmetic_slice_array = Vec::new();
             for value in values.iter() {
                 let f_value = execute_expression(value, program_archive, runtime, flags)?;
@@ -594,6 +604,8 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(array_slice), ..FoldedValue::default() }
         }
         UniformArray { meta, value, dimension, .. } => {
+            // println!("uniform array");
+
             let f_dimension = execute_expression(dimension, program_archive, runtime, flags)?;
             let arithmetic_dimension = safe_unwrap_to_single_arithmetic_expression(f_dimension, line!());
             let usable_dimension = if let Option::Some(dimension) = cast_index(&arithmetic_dimension) {
@@ -630,6 +642,8 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(array_slice), ..FoldedValue::default() }
         }
         InfixOp { meta, lhe, infix_op, rhe, .. } => {
+            println!("infix Op");
+
             let l_fold = execute_expression(lhe, program_archive, runtime, flags)?;
             let r_fold = execute_expression(rhe, program_archive, runtime, flags)?;
             let l_value = safe_unwrap_to_single_arithmetic_expression(l_fold, line!());
@@ -639,6 +653,8 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(r_slice), ..FoldedValue::default() }
         }
         PrefixOp { prefix_op, rhe, .. } => {
+            // println!("prefix 0p");
+
             let folded_value = execute_expression(rhe, program_archive, runtime, flags)?;
             let arithmetic_value =
                 safe_unwrap_to_single_arithmetic_expression(folded_value, line!());
@@ -647,6 +663,7 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(slice_result), ..FoldedValue::default() }
         }
         InlineSwitchOp { cond, if_true, if_false, .. } => {
+            // println!("inline switch Op");
             let f_cond = execute_expression(cond, program_archive, runtime, flags)?;
             let ae_cond = safe_unwrap_to_single_arithmetic_expression(f_cond, line!());
             let possible_bool_cond =
@@ -663,11 +680,15 @@ fn execute_expression(
             }
         }
         Call { id, args, .. } => {
+            // println!("call Op");
+
             let (value, can_simplify) = execute_call(id, args, program_archive, runtime, flags)?;
             can_be_simplified = can_simplify;
             value
         }
         ParallelOp{rhe, ..} => {
+            // println!("parallel Op");
+
             let folded_value = execute_expression(rhe, program_archive, runtime, flags)?;
             let (node_pointer, _) =
                 safe_unwrap_to_valid_node_pointer(folded_value, line!());
