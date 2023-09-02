@@ -34,5 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-circuit_build/**/*
-!circuit_build/.gitkeep
+circuit_bls12381/**/*
+!circuit_bls12381/.gitkeep
+
+circuit_secq256k1/**/*
+!circuit_secq256k1/.gitkeep

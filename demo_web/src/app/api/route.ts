@@ -6,6 +6,17 @@ const demoCircuitDir = path.resolve("../../../../demo");
 const circuitBuildDir = path.resolve("../../../circuit_build/");
 console.log("circuitBuildDir: %s", circuitBuildDir);
 
+const circuits = {
+  ex1: {
+    circuitPath: "",
+    circuitContent: "",
+    constraints: {
+      bls12381: "",
+      secp256k1: "",
+    },
+  },
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   // const id = searchParams.get("id");
