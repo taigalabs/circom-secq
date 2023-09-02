@@ -1,6 +1,6 @@
 pragma circom 2.1.2;
 
-template VitalikExample () {  
+template Vitalik () {  
  signal input a;
  signal output b;
  signal x;
@@ -13,4 +13,4 @@ template VitalikExample () {
  z === 35;
 }
 
- component main = VitalikExample();
+ component main = Vitalik();

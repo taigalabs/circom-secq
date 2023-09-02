@@ -1,24 +1,9 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
 
-const demoCircuitDir = path.resolve("../../../../demo");
-const circuitBuildDir = path.resolve("../../../circuit_build/");
-console.log("circuitBuildDir: %s", circuitBuildDir);
-
-const circuits = {
-  ex1: {
-    circuitPath: "",
-    circuitContent: "",
-    constraints: {
-      bls12381: "",
-      secp256k1: "",
-    },
-  },
-};
+import dataJson from "../../../data.json";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  // const { searchParams } = new URL(request.url);
   // const id = searchParams.get("id");
   // const res = await fetch(`https://data.mongodb-api.com/product/${id}`, {
   //   headers: {
@@ -26,7 +11,6 @@ export async function GET(request: Request) {
   //     "API-Key": process.env.DATA_API_KEY,
   //   },
   // });
-  const product = { powre: 1 };
 
-  return NextResponse.json({ product });
+  return NextResponse.json(dataJson);
 }
