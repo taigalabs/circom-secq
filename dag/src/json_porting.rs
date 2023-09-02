@@ -15,6 +15,7 @@ fn transform_constraint_to_json(constraint: &C) -> JsonValue {
         hashmap_as_json(constraint.c()),
     ])
 }
+
 fn hashmap_as_json(values: &HashMap<usize, BigInt>) -> JsonValue {
     let mut order: Vec<&usize> = values.keys().collect();
     order.sort();
@@ -28,6 +29,8 @@ fn hashmap_as_json(values: &HashMap<usize, BigInt>) -> JsonValue {
 }
 
 fn visit_tree(tree: &Tree, writer: &mut ConstraintJSON) -> Result<(), ()> {
+    println!("visit_tree: {:?}", tree.id_to_name);
+
     for constraint in &tree.constraints {
         let json_value = transform_constraint_to_json(&constraint);
         writer.write_constraint(&json_value.to_string())?;
@@ -40,7 +43,36 @@ fn visit_tree(tree: &Tree, writer: &mut ConstraintJSON) -> Result<(), ()> {
 }
 
 pub fn port_constraints(dag: &DAG, debug: &DebugWriter) -> Result<(), ()> {
+    println!("port_constraints(): constraint count: {}", &Tree::new(dag).constraints.len());
+
     let mut writer = debug.build_constraints_file()?;
     visit_tree(&Tree::new(dag), &mut writer)?;
-    writer.end()
+    writer.end().unwrap();
+
+    let mut writer_ext = debug.build_constraints_ext_file()?;
+    visit_tree_ext(&Tree::new(dag), &mut writer_ext)?;
+    writer_ext.end().unwrap();
+
+    Ok(())
+}
+
+fn visit_tree_ext(tree: &Tree, writer: &mut ConstraintJSON) -> Result<(), ()> {
+    println!("visit_tree: {:?}", tree.id_to_name);
+
+    for constraint in &tree.constraints {
+        // let json_value = transform_constraint_to_json(&constraint);
+
+        let json_value = JsonValue::Array(vec![
+            hashmap_as_json(constraint.a()),
+            hashmap_as_json(constraint.b()),
+            hashmap_as_json(constraint.c()),
+        ]);
+
+        writer.write_constraint(&json_value.to_string())?;
+    }
+    for edge in Tree::get_edges(tree) {
+        let subtree = Tree::go_to_subtree(tree, edge);
+        visit_tree(&subtree, writer)?;
+    }
+    Result::Ok(())
 }

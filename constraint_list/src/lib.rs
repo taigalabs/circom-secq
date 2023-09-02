@@ -168,6 +168,8 @@ impl ConstraintExporter for ConstraintList {
     }
 
     fn json_constraints(&self, writer: &DebugWriter) -> Result<(), ()> {
+        println!("ConstraintList json_constraints()");
+
         json_porting::port_constraints(&self.constraints, &self.signal_map, writer)
     }
 

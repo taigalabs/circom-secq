@@ -111,14 +111,14 @@ pub fn constraint_execution(
 
     runtime_information.public_inputs = program_archive.get_public_inputs_main_component().clone();
 
-    println!("{:?}", runtime_information.public_inputs);
+    println!("constraint_execution(): public_iputs: {:?}", runtime_information.public_inputs);
     
     let folded_value_result = 
         if let Call { id, args, .. } = &program_archive.get_main_expression() {
+            println!("main id: {}, args len: {}", id, args.len());
+
             let mut arg_values = Vec::new();
             for arg_expression in args.iter() {
-            println!("id: {}", id);
-
                 let f_arg = execute_expression(arg_expression, program_archive, &mut runtime_information, flags);
                 arg_values.push(safe_unwrap_to_arithmetic_slice(f_arg.unwrap(), line!()));
                 // improve
@@ -134,7 +134,7 @@ pub fn constraint_execution(
         } else {
             unreachable!("The main expression should be a call."); 
         };
-    
+
     
     match folded_value_result {
         Result::Err(_) => Result::Err(runtime_information.runtime_errors),
@@ -179,13 +179,18 @@ fn execute_statement(
     actual_node: &mut Option<ExecutedTemplate>,
     flags: FlagsExecution,
 ) -> Result<(Option<FoldedValue>, bool), ()> {
+    // println!("execute_statement()");
+
     use Statement::*;
     let id = stmt.get_meta().elem_id;
     Analysis::reached(&mut runtime.analysis, id);
     let mut can_be_simplified = true;
     let res = match stmt {
         MultSubstitution { .. } => unreachable!(),
-        InitializationBlock { initializations, .. } => {
+        InitializationBlock { initializations, meta, .. } => {
+            // println!("InitializationBlock, meta elem_id: {}, start: {}, end: {}", 
+            //     meta.elem_id, meta.start, meta.end);
+
             let (possible_fold, _) = execute_sequence_of_statements(
                 initializations,
                 program_archive,
@@ -537,6 +542,7 @@ fn execute_statement(
             Option::None
         }
     };
+
     Result::Ok((res, can_be_simplified))
 }
 
@@ -550,14 +556,14 @@ fn execute_expression(
     let mut can_be_simplified = true;
     let res = match expr {
         Number(_, value) => {
-            println!("expr number: {}", value);
+            println!("execute_expression(), number: {}", value);
 
             let a_value = AExpr::Number { value: value.clone() };
             let ae_slice = AExpressionSlice::new(&a_value);
             FoldedValue { arithmetic_slice: Option::Some(ae_slice), ..FoldedValue::default() }
         }
         Variable { meta, name, access, .. } => {
-            println!("expr variable, name: {}", name);
+            println!("execute_expression(), variable, name: {}", name);
 
             if ExecutionEnvironment::has_signal(&runtime.environment, name) {
                 execute_signal(meta, name, access, program_archive, runtime, flags)?
@@ -570,7 +576,7 @@ fn execute_expression(
             }
         }
         ArrayInLine { meta, values, .. } => {
-            // println!("expr array in line");
+            println!("execute_expression(), array in line");
 
             let mut arithmetic_slice_array = Vec::new();
             for value in values.iter() {
@@ -604,7 +610,7 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(array_slice), ..FoldedValue::default() }
         }
         UniformArray { meta, value, dimension, .. } => {
-            // println!("uniform array");
+            println!("execute_expression(), uniform array");
 
             let f_dimension = execute_expression(dimension, program_archive, runtime, flags)?;
             let arithmetic_dimension = safe_unwrap_to_single_arithmetic_expression(f_dimension, line!());
@@ -642,7 +648,7 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(array_slice), ..FoldedValue::default() }
         }
         InfixOp { meta, lhe, infix_op, rhe, .. } => {
-            println!("infix Op");
+            println!("execute_expression(), infix Op");
 
             let l_fold = execute_expression(lhe, program_archive, runtime, flags)?;
             let r_fold = execute_expression(rhe, program_archive, runtime, flags)?;
@@ -653,7 +659,7 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(r_slice), ..FoldedValue::default() }
         }
         PrefixOp { prefix_op, rhe, .. } => {
-            // println!("prefix 0p");
+            println!("execute_expression(), prefix 0p");
 
             let folded_value = execute_expression(rhe, program_archive, runtime, flags)?;
             let arithmetic_value =
@@ -663,7 +669,8 @@ fn execute_expression(
             FoldedValue { arithmetic_slice: Option::Some(slice_result), ..FoldedValue::default() }
         }
         InlineSwitchOp { cond, if_true, if_false, .. } => {
-            // println!("inline switch Op");
+            println!("inline switch Op");
+
             let f_cond = execute_expression(cond, program_archive, runtime, flags)?;
             let ae_cond = safe_unwrap_to_single_arithmetic_expression(f_cond, line!());
             let possible_bool_cond =
@@ -680,14 +687,14 @@ fn execute_expression(
             }
         }
         Call { id, args, .. } => {
-            // println!("call Op");
+            println!("execute_expression(), call Op");
 
             let (value, can_simplify) = execute_call(id, args, program_archive, runtime, flags)?;
             can_be_simplified = can_simplify;
             value
         }
         ParallelOp{rhe, ..} => {
-            // println!("parallel Op");
+            println!("execute_expression(), parallel Op");
 
             let folded_value = execute_expression(rhe, program_archive, runtime, flags)?;
             let (node_pointer, _) =
@@ -698,12 +705,17 @@ fn execute_expression(
     };
     let expr_id = expr.get_meta().elem_id;
     let res_p = res.arithmetic_slice.clone();
+
+    println!("execute_expression(), terminating, expr_id: {}, node_pointer: {:?}", expr_id, res.node_pointer);
     if let Some(slice) = res_p {
+        println!("  - execute_expression(), expr_id: {}, arith expr: {}", expr_id, slice);
+
         if slice.is_single() && can_be_simplified{
             let value = AExpressionSlice::unwrap_to_single(slice);
             Analysis::computed(&mut runtime.analysis, expr_id, value);
         }
     }
+
     Result::Ok(res)
 }
 
@@ -1824,6 +1836,8 @@ fn execute_template_call(
     runtime: &mut RuntimeInformation,
     flags: FlagsExecution
 ) -> Result<FoldedValue, ()> {
+    println!("execute_template_call()");
+
     debug_assert!(runtime.block_type == BlockType::Known);
     let is_main = std::mem::replace(&mut runtime.public_inputs, vec![]);
     let is_parallel = program_archive.get_template_data(id).is_parallel();

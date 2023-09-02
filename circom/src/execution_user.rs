@@ -26,6 +26,7 @@ pub fn execute_project(
     program_archive: ProgramArchive,
     config: ExecutionConfig,
 ) -> Result<VCP, ()> {
+    println!("execute_project()");
     use constraint_generation::{build_circuit, BuildConfig};
     let debug = DebugWriter::new(config.json_constraints).unwrap();
     let build_config = BuildConfig {

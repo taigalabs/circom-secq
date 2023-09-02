@@ -44,6 +44,8 @@ impl<'a> Tree<'a> {
         let forbidden: HashSet<_> =
             root.forbidden_if_main.iter().cloned().map(|s| s + offset).collect();
         for (name, id) in root.correspondence() {
+            println!("tree new, name: {}, id: {}", name, id);
+
             if root.is_local_signal(*id) {
                 Vec::push(&mut signals, *id + offset);
                 HashMap::insert(&mut id_to_name, *id, name.clone());
@@ -91,11 +93,18 @@ pub struct Edge {
     in_number: usize,
     out_number: usize,
     in_component_number: usize,
-    out_component_number: usize
+    out_component_number: usize,
 }
 impl Edge {
     fn new_entry(id: usize) -> Edge {
-        Edge { label: "main".to_string(), goes_to: id, in_number: 0, out_number: 0, in_component_number: 0, out_component_number: 0  }
+        Edge {
+            label: "main".to_string(),
+            goes_to: id,
+            in_number: 0,
+            out_number: 0,
+            in_component_number: 0,
+            out_component_number: 0,
+        }
     }
 
     pub fn get_goes_to(&self) -> usize {
@@ -163,10 +172,11 @@ impl Node {
         parameters: Vec<BigInt>,
         ordered_signals: Vec<String>,
         is_parallel: bool,
-        is_custom_gate: bool
+        is_custom_gate: bool,
     ) -> Node {
         Node {
-            template_name, entry: Edge::new_entry(id),
+            template_name,
+            entry: Edge::new_entry(id),
             parameters,
             number_of_components: 1,
             ordered_signals,
@@ -305,6 +315,7 @@ impl ConstraintExporter for DAG {
     }
 
     fn json_constraints(&self, writer: &DebugWriter) -> Result<(), ()> {
+        println!("DAG json_constraints()");
         DAG::generate_json_constraints(self, writer)
     }
 
@@ -315,12 +326,7 @@ impl ConstraintExporter for DAG {
 
 impl DAG {
     pub fn new(prime: &String) -> DAG {
-        DAG{
-            prime : prime.clone(),
-            one_signal: 0,
-            nodes: Vec::new(),
-            adjacency: Vec::new(),
-        }
+        DAG { prime: prime.clone(), one_signal: 0, nodes: Vec::new(), adjacency: Vec::new() }
     }
 
     pub fn add_edge(&mut self, to: usize, label: &str, is_parallel: bool) -> Option<&Edge> {
@@ -352,7 +358,7 @@ impl DAG {
                     let concrete_name = format!("{}.{}", label, signal);
                     let concrete_value = with.in_number + *id;
                     correspondence.insert(concrete_name, concrete_value);
-                    if *id <= self.nodes[to].inputs_length + self.nodes[to].outputs_length{
+                    if *id <= self.nodes[to].inputs_length + self.nodes[to].outputs_length {
                         // in case it is an input/output signal
                         reachables.insert(concrete_value);
                     }
@@ -374,12 +380,26 @@ impl DAG {
         parameters: Vec<BigInt>,
         ordered_signals: Vec<String>,
         is_parallel: bool,
-        is_custom_gate: bool
+        is_custom_gate: bool,
     ) -> usize {
         let id = self.nodes.len();
-        self.nodes.push(
-            Node::new(id, template_name, parameters, ordered_signals, is_parallel, is_custom_gate)
+        println!(
+            "DAG::add_node(), id: {}, template_name: {}, ordered_signals: {:?}",
+            id, template_name, ordered_signals
         );
+
+        for par in parameters.iter() {
+            println!("  par: {}", par);
+        }
+
+        self.nodes.push(Node::new(
+            id,
+            template_name,
+            parameters,
+            ordered_signals,
+            is_parallel,
+            is_custom_gate,
+        ));
         self.adjacency.push(vec![]);
         id
     }
@@ -404,6 +424,8 @@ impl DAG {
 
     pub fn add_constraint(&mut self, constraint: Constraint) {
         if let Option::Some(node) = self.get_mut_main() {
+            println!("add_constraint(): constraint signals {:?}", constraint.take_signals());
+
             node.add_constraint(constraint);
         }
     }
@@ -414,7 +436,7 @@ impl DAG {
         }
     }
 
-    pub fn set_number_of_subcomponents_indexes(&mut self, number_scmp: usize){
+    pub fn set_number_of_subcomponents_indexes(&mut self, number_scmp: usize) {
         if let Option::Some(node) = self.get_mut_main() {
             node.set_number_of_subcomponents_indexes(number_scmp);
         }
@@ -542,5 +564,5 @@ pub struct SimplificationFlags {
     pub parallel_flag: bool,
     pub port_substitution: bool,
     pub flag_old_heuristics: bool,
-    pub prime : String,
+    pub prime: String,
 }
