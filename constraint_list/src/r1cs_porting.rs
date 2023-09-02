@@ -1,5 +1,7 @@
 use super::{ConstraintList, C, EncodingIterator, SignalMap};
-use constraint_writers::r1cs_writer::{ConstraintSection, CustomGatesAppliedData, HeaderData, R1CSWriter, SignalSection};
+use constraint_writers::r1cs_writer::{
+    ConstraintSection, CustomGatesAppliedData, HeaderData, R1CSWriter, SignalSection,
+};
 
 fn nearest_power_of_2(n: usize) -> usize {
     let mut v = 256usize;
@@ -11,7 +13,15 @@ fn nearest_power_of_2(n: usize) -> usize {
 
 pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Result<(), ()> {
     use constraint_writers::log_writer::Log;
+
     let field_size = nearest_power_of_2(list.field.bits()) / 8;
+
+    //     let field_size = if list.field.bits() % 64 == 0 {
+    //         list.field.bits() / 8
+    //     } else{
+    //         (list.field.bits() / 64 + 1) * 8
+    //     };
+
     let mut log = Log::new();
     log.no_labels = ConstraintList::no_labels(list);
     log.no_wires = ConstraintList::no_wires(list);
@@ -54,8 +64,9 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
         SignalSection::write_signal_usize(&mut signal_section, id)?;
     }
     let r1cs = signal_section.end_section()?;
-
-    if custom_gates {
+    if !custom_gates {
+        R1CSWriter::finish_writing(r1cs)?;
+    } else {
         let mut custom_gates_used_section = R1CSWriter::start_custom_gates_used_section(r1cs)?;
         let (usage_data, occurring_order) = {
             let mut usage_data = vec![];
@@ -64,7 +75,7 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
                 if node.is_custom_gate {
                     let mut name = node.name.clone();
                     occurring_order.push(name.clone());
-                    while name.pop() != Some('(') {};
+                    while name.pop() != Some('(') {}
                     usage_data.push((name, node.parameters.clone()));
                 }
             }
@@ -73,11 +84,12 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
         custom_gates_used_section.write_custom_gates_usages(usage_data)?;
         let r1cs = custom_gates_used_section.end_section()?;
 
-        let mut custom_gates_applied_section = R1CSWriter::start_custom_gates_applied_section(r1cs)?;
+        let mut custom_gates_applied_section =
+            R1CSWriter::start_custom_gates_applied_section(r1cs)?;
         let application_data = {
             fn find_indexes(
                 occurring_order: Vec<String>,
-                application_data: Vec<(String, Vec<usize>)>
+                application_data: Vec<(String, Vec<usize>)>,
             ) -> CustomGatesAppliedData {
                 let mut new_application_data = vec![];
                 for (custom_gate_name, signals) in application_data {
@@ -93,7 +105,7 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
             fn iterate(
                 iterator: EncodingIterator,
                 map: &SignalMap,
-                application_data: &mut Vec<(String, Vec<usize>)>
+                application_data: &mut Vec<(String, Vec<usize>)>,
             ) {
                 let node = &iterator.encoding.nodes[iterator.node_id];
                 if node.is_custom_gate {
@@ -118,9 +130,9 @@ pub fn port_r1cs(list: &ConstraintList, output: &str, custom_gates: bool) -> Res
             find_indexes(occurring_order, application_data)
         };
         custom_gates_applied_section.write_custom_gates_applications(application_data)?;
-        let _r1cs = custom_gates_applied_section.end_section()?;
+        let r1cs = custom_gates_applied_section.end_section()?;
+        R1CSWriter::finish_writing(r1cs)?;
     }
-
     Log::print(&log);
     Ok(())
 }
@@ -137,3 +149,4 @@ mod tests {
         }
     }
 }
+
