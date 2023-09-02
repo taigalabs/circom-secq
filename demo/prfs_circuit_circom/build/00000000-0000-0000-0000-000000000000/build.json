@@ -1,0 +1,84 @@
+{
+  "circuit_version": "0.0.1",
+  "circuit_id": "00000000-0000-0000-0000-000000000000",
+  "circuit_type": "MEMBERSHIP_PROOF_1",
+  "label": "addr_membership2",
+  "desc": "Prove address membership (ECDSA, Poseidon)",
+  "author": "SYSTEM_NATIVE",
+  "num_public_inputs": 5,
+  "circuit_dsl": "Circom 2",
+  "arithmetization": "R1CS",
+  "proof_algorithm": "Spartan",
+  "elliptic_curve": "Secp256k1",
+  "finite_field": "Z_(2^256-2^32-977)",
+  "circuit_driver_id": "SPARTAN_CIRCOM_1",
+  "driver_version": "0.1.0",
+  "driver_properties": {
+    "instance_path": "instances/addr_membership2.circom",
+    "wtns_gen_url": "prfs://00000000-0000-0000-0000-000000000000/addr_membership2_js/addr_membership2.wasm",
+    "circuit_url": "prfs://00000000-0000-0000-0000-000000000000/addr_membership2_0.0.1.spartan.circuit"
+  },
+  "raw_circuit_inputs_meta": [
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "Tx",
+      "desc": "Tx description",
+      "public": true
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "Ty",
+      "desc": "Ty description",
+      "public": true
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "Ux",
+      "desc": "Ux description",
+      "public": true
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "Uy",
+      "desc": "Uy description",
+      "public": true
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "Merkle root",
+      "desc": "Vector commitment (Merkle root) of a set",
+      "public": true
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "m",
+      "desc": "Message",
+      "public": false
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "r",
+      "desc": "R value of a signature",
+      "public": false
+    },
+    {
+      "type": "FIELD_ELEMENT",
+      "label": "s",
+      "desc": "S value of a siganture",
+      "public": false
+    },
+    {
+      "type": "FIELD_ELEMENT_VECTOR",
+      "label": "pathIndices",
+      "desc": "Merkle path indices",
+      "public": false
+    },
+    {
+      "type": "FIELD_ELEMENT_VECTOR",
+      "label": "siblings",
+      "desc": "Siblings of a leaf in a Merkle path towards the root",
+      "public": false
+    }
+  ],
+  "created_at": "2023-05-02T00:39:57Z"
+}
