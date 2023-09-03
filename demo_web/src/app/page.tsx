@@ -93,7 +93,7 @@ export default function Home() {
 
         elems.push(
           <div className={styles.row} key={idx}>
-            <div className={styles.lineNo}>{idx}</div>
+            <div className={styles.lineNo}>{idx + 1}</div>
             <div className={styles.line}>
               {whitespaceElem}
               {line}
