@@ -22,15 +22,24 @@ export default function Home() {
   }, [setData]);
 
   const elem = React.useMemo(() => {
-    console.log(11, data);
-
     if (data) {
       const { fileContent } = data[circuit];
       const { constraints } = data[circuit].analysis[prime];
 
       let skipped = false;
       let constraintIdx = 0;
-      const lineElem = fileContent.map((line, idx) => {
+      const elems: React.ReactNode[] = [];
+
+      elems.push(
+        <div className={styles.row} key="first">
+          <div className={styles.line}></div>
+          <div className={styles.polyCol}>A</div>
+          <div className={styles.polyCol}>B</div>
+          <div className={styles.polyCol}>C</div>
+        </div>
+      );
+
+      fileContent.forEach((line, idx) => {
         let aElem = [],
           bElem = [],
           cElem = [];
@@ -81,7 +90,7 @@ export default function Home() {
           );
         }
 
-        return (
+        elems.push(
           <div className={styles.row} key={idx}>
             <div className={styles.line}>
               {whitespaceElem}
@@ -94,7 +103,7 @@ export default function Home() {
         );
       });
 
-      return lineElem;
+      return elems;
     } else {
       return <div>Loading...</div>;
     }

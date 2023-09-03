@@ -5,20 +5,22 @@
 .row {
   display: flex;
   padding: 2px 0;
-  border-bottom: 1px solid gray;
   min-height: 20px;
 }
 
 .line {
+  border-bottom: 1px solid gray;
   font-family: "JetBrains Mono", monospace;
   flex-shrink: 0;
   width: 500px;
+  padding-right: 45px;
 }
 
 .polyCol {
+  font-size: 12px;
   /* display: flex; */
   width: 220px;
-  margin-right: 35px;
+  padding-left: 35px;
   word-break: break-all;
 }
 
