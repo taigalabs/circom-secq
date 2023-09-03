@@ -8,7 +8,7 @@ template Multiplier2 () {
    signal output out;  
 
    // Constraints.  
-   out <== in1 * in2;  
+   out <== in1 * in2;   
 }
 
 //This circuit multiplies in1, in2, and in3.
@@ -30,3 +30,4 @@ template Multiplier3 () {
 }
 
 component main {public [in1, in2, in3]} = Multiplier3();
+

@@ -1,6 +1,8 @@
 import path from "path";
 import fs from "fs";
 
+import { DataJSON } from "@/app/data";
+
 const demoCircuitDir = path.resolve("../demo");
 const dataJsonPath = path.resolve("data.json");
 const circuitBls12381 = path.resolve("./circuit_bls12381");
@@ -39,14 +41,3 @@ function loadCircuitData() {
 }
 
 loadCircuitData();
-
-interface DataJSON {
-  [key: string]: Data;
-}
-
-interface Data {
-  fileContent: string[];
-  analysis: {
-    [key: string]: { [key: string]: string }[][];
-  };
-}

@@ -42,7 +42,7 @@ fn ext_hashmap_as_json(
         println!("key: {}, map: {:?}", key, id_to_name);
 
         let name = if *key == 0 {
-            "constant".to_string()
+            "1".to_string()
         } else {
             if let Some(n) = id_to_name.get(key) {
                 n.to_string()
