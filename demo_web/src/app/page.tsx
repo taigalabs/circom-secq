@@ -32,6 +32,7 @@ export default function Home() {
 
       elems.push(
         <div className={styles.row} key="first">
+          <div className={styles.lineNo}></div>
           <div className={styles.line}></div>
           <div className={styles.polyCol}>A</div>
           <div className={styles.polyCol}>B</div>
@@ -52,30 +53,30 @@ export default function Home() {
             // ad hoc
             if (circuit === "multiplier3" && !skipped) {
               skipped = true;
-              return;
-            }
+              // return;
+            } else {
+              // console.log(1, constraints, constraintIdx);
+              const row = constraints[constraintIdx];
 
-            // console.log(1, constraints, constraintIdx);
-            const row = constraints[constraintIdx];
+              if (row) {
+                const [a, b, c] = row;
+                // console.log("a", a);
+                for (const [k, v] of Object.entries(a)) {
+                  aElem.push(`${k} * ${v}`);
+                }
 
-            if (row) {
-              const [a, b, c] = row;
-              // console.log("a", a);
-              for (const [k, v] of Object.entries(a)) {
-                aElem.push(`${k} * ${v}`);
+                // console.log("bbb", b);
+                for (const [k, v] of Object.entries(b)) {
+                  bElem.push(`${k} * ${v}`);
+                }
+
+                // console.log("c", c);
+
+                for (const [k, v] of Object.entries(c)) {
+                  cElem.push(`${k} * ${v}`);
+                }
+                constraintIdx += 1;
               }
-
-              // console.log("bbb", b);
-              for (const [k, v] of Object.entries(b)) {
-                bElem.push(`${k} * ${v}`);
-              }
-
-              // console.log("c", c);
-
-              for (const [k, v] of Object.entries(c)) {
-                cElem.push(`${k} * ${v}`);
-              }
-              constraintIdx += 1;
             }
           }
         }
@@ -92,6 +93,7 @@ export default function Home() {
 
         elems.push(
           <div className={styles.row} key={idx}>
+            <div className={styles.lineNo}>{idx}</div>
             <div className={styles.line}>
               {whitespaceElem}
               {line}
