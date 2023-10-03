@@ -319,14 +319,11 @@ mod input_processing {
                    if prime_value == "bn128"
                       || prime_value == "bls12381"
                       || prime_value == "goldilocks"
-<<<<<<< HEAD
                       || prime_value == "curve25519"
                       || prime_value == "secq256k1"
-=======
                       || prime_value == "grumpkin"
                       || prime_value == "pallas"
                       || prime_value == "vesta"
->>>>>>> d218488bdf8622db7671ae945aa802f0060da14d
                       {
                         Ok(String::from(matches.value_of("prime").unwrap()))
                     }
